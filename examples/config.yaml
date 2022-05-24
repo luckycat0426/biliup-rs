@@ -33,3 +33,19 @@ streamers:
     tag: "biliup"
     dtime: ~
     open_subtitle: false
+  文件夹名称:
+    copyright: 1
+    source: 转载来源
+    tid: 171 # 投稿分区
+    cover: "" # 视频封面
+    desc_format_id: 0
+    desc: 简介
+    dolby: 1 # 杜比音效
+    dynamic: ""
+    subtitle:
+      open: 0
+      lan: ""
+    tag: "biliup"
+    dtime: ~
+    multiple_folder: true
+    open_subtitle: false

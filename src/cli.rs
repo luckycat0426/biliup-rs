@@ -22,6 +22,8 @@ use std::pin::Pin;
 use std::task::Poll;
 use std::time::Instant;
 
+use std::fs;
+
 #[derive(Parser)]
 #[clap(author, version, about)]
 struct Cli {
@@ -161,6 +163,45 @@ pub async fn parse() -> Result<()> {
             let config = load_config(&config)?;
             println!("number of concurrent futures: {}", config.limit);
             for (filename_patterns, mut studio) in config.streamers {
+                if studio.multiple_folder == true {
+                    let paths = match fs::read_dir(&filename_patterns) {
+                        Ok(paths) => paths,
+                        Err(e) => {
+                            match e.kind() {
+                                std::io::ErrorKind::NotFound => {
+                                    println!("Folder not found: {}", &filename_patterns)
+                                }
+                                oe => {
+                                    println!("Fail to Open Folader {} : {}", &filename_patterns, oe)
+                                }
+                            };
+                            continue;
+                        }
+                    };
+                    cover_up(&mut studio, &login_info, &client).await?;
+                    for folder in paths {
+                        let folder = folder.unwrap().path();
+                        let mut video_paths = Vec::new();
+                        for filename in fs::read_dir(&folder).unwrap() {
+                            let filename = filename.unwrap().path();
+                            video_paths.push(filename);
+                        }
+                        studio.title = folder.file_stem().unwrap().to_str().unwrap().to_string();
+                        println!("Uploading folder: {}", studio.title);
+                        studio.videos = upload(
+                            &video_paths,
+                            &client,
+                            config
+                                .line
+                                .as_ref()
+                                .and_then(|l| UploadLine::from_str(l, true).ok()),
+                            config.limit,
+                        )
+                        .await?;
+                        studio.submit(&login_info).await?;
+                    }
+                    continue;
+                }
                 let mut paths = Vec::new();
                 for entry in glob::glob(&filename_patterns)?.filter_map(Result::ok) {
                     paths.push(entry);

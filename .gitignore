@@ -4,3 +4,6 @@
 *.json
 *.exe
 *.png
+*.webm
+*.mkv
+config.yaml

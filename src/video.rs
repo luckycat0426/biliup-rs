@@ -63,6 +63,10 @@ pub struct Studio {
     #[serde(default)]
     pub open_subtitle: bool,
 
+    #[clap(skip)]
+    #[serde(default)]
+    pub multiple_folder: bool,
+
     #[clap(long, default_value = "0")]
     #[serde(default)]
     pub interactive: u8,
